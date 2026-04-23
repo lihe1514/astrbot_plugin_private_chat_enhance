@@ -18,22 +18,28 @@
     "description": "关键词回复列表",
     "hint": "配置关键词触发回复，首次触发生效，后续不再回复。",
     "type": "template_list",
-    "template_schema": {
-      "keyword": {
-        "type": "string",
-        "description": "触发关键词",
-        "hint": "当用户消息包含此关键词时触发"
-      },
-      "reply": {
-        "type": "string",
-        "description": "回复内容",
-        "hint": "首次触发时发送的回复内容"
-      },
-      "exact_match": {
-        "type": "bool",
-        "description": "精确匹配",
-        "hint": "开启后需完全匹配关键词；关闭则消息包含关键词即触发",
-        "default": false
+    "templates": {
+      "keyword_reply": {
+        "name": "关键词回复",
+        "hint": "设置关键词和对应的回复内容",
+        "items": {
+          "keyword": {
+            "type": "string",
+            "description": "触发关键词",
+            "hint": "当用户消息包含此关键词时触发"
+          },
+          "reply": {
+            "type": "string",
+            "description": "回复内容",
+            "hint": "首次触发时发送的回复内容"
+          },
+          "exact_match": {
+            "type": "bool",
+            "description": "精确匹配",
+            "hint": "开启后需完全匹配关键词；关闭则消息包含关键词即触发",
+            "default": false
+          }
+        }
       }
     }
   }
