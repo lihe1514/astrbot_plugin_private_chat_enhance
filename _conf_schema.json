@@ -15,26 +15,26 @@
     "default": 30
   },
   "keyword_replies": {
-    "type": "list",
     "description": "关键词回复列表",
-    "items": {
-      "type": "object",
-      "items": {
-        "keyword": {
-          "type": "string",
-          "description": "触发关键词"
-        },
-        "reply": {
-          "type": "string",
-          "description": "回复内容"
-        },
-        "exact_match": {
-          "type": "bool",
-          "description": "是否精确匹配（默认模糊匹配）",
-          "default": false
-        }
+    "hint": "配置关键词触发回复，首次触发生效，后续不再回复。",
+    "type": "template_list",
+    "template_schema": {
+      "keyword": {
+        "type": "string",
+        "description": "触发关键词",
+        "hint": "当用户消息包含此关键词时触发"
+      },
+      "reply": {
+        "type": "string",
+        "description": "回复内容",
+        "hint": "首次触发时发送的回复内容"
+      },
+      "exact_match": {
+        "type": "bool",
+        "description": "精确匹配",
+        "hint": "开启后需完全匹配关键词；关闭则消息包含关键词即触发",
+        "default": false
       }
-    },
-    "default": []
+    }
   }
 }
