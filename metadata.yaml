@@ -1,2 +1,7 @@
+name: astrbot_plugin_private_chat_enhance
+desc: 私聊增强插件，提供随机延迟回复、自定义关键词回复（首次触发生效）。
+author: lihe1514
+version: 0.1.0
+repo: https://github.com/lihe1514/astrbot_plugin_private_chat_enhance
 display_name: "私聊增强"
 astrbot_version: ">=4.16,<5"
