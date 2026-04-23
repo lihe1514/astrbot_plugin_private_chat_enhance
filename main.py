@@ -56,17 +56,26 @@ class Main(star.Star):
         user_id = self._get_user_id(event)
         message = event.message_str.strip()
 
+        logger.info(
+            f"private-chat-enhance | 收到私聊消息 | user={user_id} msg={message} "
+            f"keywords_count={len(cfg.keyword_replies)} delay_enabled={cfg.enable_delay}"
+        )
+
         # 检查关键词回复
         keyword_matched = None
         for kr in cfg.keyword_replies:
+            logger.debug(
+                f"private-chat-enhance | 检查关键词 [{kr.keyword}] exact={kr.exact_match}"
+            )
             if self._match_keyword(message, kr.keyword, kr.exact_match):
                 # 检查是否已触发过（从持久化存储读取）
                 if self.keyword_store.has_triggered(user_id, kr.keyword):
-                    logger.debug(
+                    logger.info(
                         f"private-chat-enhance | 用户 {user_id} 已触发过关键词 [{kr.keyword}]，跳过回复"
                     )
                     continue
                 keyword_matched = kr
+                logger.info(f"private-chat-enhance | 匹配到关键词 [{kr.keyword}]")
                 break
 
         # 延迟回复
@@ -78,7 +87,7 @@ class Main(star.Star):
             # 记录到持久化存储
             self.keyword_store.mark_triggered(user_id, keyword_matched.keyword, time.time())
             logger.info(
-                f"private-chat-enhance | 用户 {user_id} 首次触发关键词 [{keyword_matched.keyword}]"
+                f"private-chat-enhance | 用户 {user_id} 首次触发关键词 [{keyword_matched.keyword}]，发送回复"
             )
             yield event.plain_result(keyword_matched.reply)
             return
