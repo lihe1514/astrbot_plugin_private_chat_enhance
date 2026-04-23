@@ -1,0 +1,40 @@
+{
+  "enable_delay": {
+    "type": "bool",
+    "description": "启用私聊延迟回复",
+    "default": true
+  },
+  "min_delay_sec": {
+    "type": "int",
+    "description": "最小延迟秒数",
+    "default": 2
+  },
+  "max_delay_sec": {
+    "type": "int",
+    "description": "最大延迟秒数",
+    "default": 30
+  },
+  "keyword_replies": {
+    "type": "list",
+    "description": "关键词回复列表",
+    "items": {
+      "type": "object",
+      "items": {
+        "keyword": {
+          "type": "string",
+          "description": "触发关键词"
+        },
+        "reply": {
+          "type": "string",
+          "description": "回复内容"
+        },
+        "exact_match": {
+          "type": "bool",
+          "description": "是否精确匹配（默认模糊匹配）",
+          "default": false
+        }
+      }
+    },
+    "default": []
+  }
+}
