@@ -28,7 +28,10 @@ class Main(star.Star):
         logger.info("private-chat-enhance | 插件已初始化")
 
     def _cfg(self) -> PluginConfig:
-        return parse_plugin_config(self.config)
+        logger.info(f"private-chat-enhance | raw config: {self.config}")
+        parsed = parse_plugin_config(self.config)
+        logger.info(f"private-chat-enhance | parsed keyword_replies: {parsed.keyword_replies}")
+        return parsed
 
     def _get_user_id(self, event: AstrMessageEvent) -> str:
         """获取用户唯一标识"""
@@ -64,12 +67,17 @@ class Main(star.Star):
         # 检查关键词回复
         keyword_matched = None
         for kr in cfg.keyword_replies:
-            logger.debug(
-                f"private-chat-enhance | 检查关键词 [{kr.keyword}] exact={kr.exact_match}"
+            logger.info(
+                f"private-chat-enhance | 检查关键词 [{kr.keyword}] exact={kr.exact_match} "
+                f"in message [{message}]"
             )
-            if self._match_keyword(message, kr.keyword, kr.exact_match):
+            match_result = self._match_keyword(message, kr.keyword, kr.exact_match)
+            logger.info(f"private-chat-enhance | 匹配结果: {match_result}")
+            if match_result:
                 # 检查是否已触发过（从持久化存储读取）
-                if self.keyword_store.has_triggered(user_id, kr.keyword):
+                has_triggered = self.keyword_store.has_triggered(user_id, kr.keyword)
+                logger.info(f"private-chat-enhance | 已触发过: {has_triggered}")
+                if has_triggered:
                     logger.info(
                         f"private-chat-enhance | 用户 {user_id} 已触发过关键词 [{kr.keyword}]，跳过回复"
                     )

@@ -47,7 +47,10 @@ def parse_plugin_config(raw: dict[str, Any] | None) -> PluginConfig:
     raw = raw or {}
 
     keyword_replies: list[KeywordReply] = []
-    for item in raw.get("keyword_replies", []):
+    raw_keyword_replies = raw.get("keyword_replies", [])
+    print(f"[DEBUG] raw keyword_replies type: {type(raw_keyword_replies)}")
+    print(f"[DEBUG] raw keyword_replies value: {raw_keyword_replies}")
+    for item in raw_keyword_replies:
         if isinstance(item, dict):
             keyword = str(item.get("keyword", "")).strip()
             reply = str(item.get("reply", "")).strip()
