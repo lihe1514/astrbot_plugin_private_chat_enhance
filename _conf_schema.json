@@ -6,13 +6,15 @@
   },
   "min_delay_sec": {
     "type": "int",
-    "description": "最小延迟秒数",
-    "default": 2
+    "description": "最小延迟秒数（0-60）",
+    "default": 2,
+    "hint": "范围：0-60 秒"
   },
   "max_delay_sec": {
     "type": "int",
-    "description": "最大延迟秒数",
-    "default": 30
+    "description": "最大延迟秒数（0-60）",
+    "default": 30,
+    "hint": "范围：0-60 秒"
   },
   "keyword_replies": {
     "description": "关键词回复列表",

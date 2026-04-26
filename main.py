@@ -6,6 +6,7 @@ from pathlib import Path
 
 from astrbot.api import logger, star
 from astrbot.api.event import AstrMessageEvent, filter
+from astrbot.api.message_components import MessageChain
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
 from .keyword_trigger_store import KeywordTriggerStore
@@ -52,6 +53,14 @@ class Main(star.Star):
         logger.debug(f"private-chat-enhance | 延迟 {delay:.1f} 秒后回复")
         await asyncio.sleep(delay)
 
+    async def _send_delayed_keyword_reply(
+        self, unified_msg_origin: str, reply: str, min_sec: int, max_sec: int
+    ) -> None:
+        """延迟后发送关键词回复"""
+        await self._delay_reply(min_sec, max_sec)
+        chain = MessageChain().message(reply)
+        await self.context.send_message(unified_msg_origin, chain)
+
     @filter.event_message_type(filter.EventMessageType.PRIVATE_MESSAGE)
     async def on_private_message(self, event: AstrMessageEvent):
         """处理私聊消息"""
@@ -86,13 +95,30 @@ class Main(star.Star):
                 logger.info(f"private-chat-enhance | 匹配到关键词 [{kr.keyword}]")
                 break
 
-        # 延迟回复
+        # 启用延迟时，关键词匹配使用异步任务发送，无匹配则延迟后继续传递
         if cfg.enable_delay:
-            await self._delay_reply(cfg.min_delay_sec, cfg.max_delay_sec)
-
-        # 关键词回复
-        if keyword_matched:
-            # 记录到持久化存储
+            if keyword_matched:
+                # 记录到持久化存储
+                self.keyword_store.mark_triggered(user_id, keyword_matched.keyword, time.time())
+                logger.info(
+                    f"private-chat-enhance | 用户 {user_id} 首次触发关键词 [{keyword_matched.keyword}]，"
+                    f"将在延迟后发送回复"
+                )
+                # 异步发送关键词回复，不阻断事件流
+                asyncio.create_task(
+                    self._send_delayed_keyword_reply(
+                        event.unified_msg_origin,
+                        keyword_matched.reply,
+                        cfg.min_delay_sec,
+                        cfg.max_delay_sec,
+                    )
+                )
+                # 继续传递事件给下游（如 LLM）
+            else:
+                # 无关键词匹配，延迟后继续传递给 LLM
+                await self._delay_reply(cfg.min_delay_sec, cfg.max_delay_sec)
+        elif keyword_matched:
+            # 未启用延迟，直接同步发送关键词回复并阻断事件流
             self.keyword_store.mark_triggered(user_id, keyword_matched.keyword, time.time())
             logger.info(
                 f"private-chat-enhance | 用户 {user_id} 首次触发关键词 [{keyword_matched.keyword}]，发送回复"

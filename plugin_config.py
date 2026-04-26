@@ -61,8 +61,8 @@ def parse_plugin_config(raw: dict[str, Any] | None) -> PluginConfig:
                     exact_match=_to_bool(item.get("exact_match"), False),
                 ))
 
-    min_delay = max(0, _to_int(raw.get("min_delay_sec"), 2))
-    max_delay = max(min_delay, _to_int(raw.get("max_delay_sec"), 30))
+    min_delay = min(60, max(0, _to_int(raw.get("min_delay_sec"), 2)))
+    max_delay = min(60, max(min_delay, _to_int(raw.get("max_delay_sec"), 30)))
 
     return PluginConfig(
         enable_delay=_to_bool(raw.get("enable_delay"), True),
