@@ -75,33 +75,38 @@ class Main(star.Star):
 
         # 检查关键词回复
         keyword_matched = None
+        matched_keyword_str = None  # 实际匹配到的关键词
         for kr in cfg.keyword_replies:
-            logger.info(
-                f"private-chat-enhance | 检查关键词 [{kr.keyword}] exact={kr.exact_match} "
-                f"in message [{message}]"
-            )
-            match_result = self._match_keyword(message, kr.keyword, kr.exact_match)
-            logger.info(f"private-chat-enhance | 匹配结果: {match_result}")
-            if match_result:
-                # 检查是否已触发过（从持久化存储读取）
-                has_triggered = self.keyword_store.has_triggered(user_id, kr.keyword)
-                logger.info(f"private-chat-enhance | 已触发过: {has_triggered}")
-                if has_triggered:
-                    logger.info(
-                        f"private-chat-enhance | 用户 {user_id} 已触发过关键词 [{kr.keyword}]，跳过回复"
-                    )
-                    continue
-                keyword_matched = kr
-                logger.info(f"private-chat-enhance | 匹配到关键词 [{kr.keyword}]")
+            for kw in kr.keywords:
+                logger.info(
+                    f"private-chat-enhance | 检查关键词 [{kw}] exact={kr.exact_match} "
+                    f"in message [{message}]"
+                )
+                match_result = self._match_keyword(message, kw, kr.exact_match)
+                logger.info(f"private-chat-enhance | 匹配结果: {match_result}")
+                if match_result:
+                    # 检查是否已触发过（从持久化存储读取）
+                    has_triggered = self.keyword_store.has_triggered(user_id, kw)
+                    logger.info(f"private-chat-enhance | 已触发过: {has_triggered}")
+                    if has_triggered:
+                        logger.info(
+                            f"private-chat-enhance | 用户 {user_id} 已触发过关键词 [{kw}]，跳过回复"
+                        )
+                        continue
+                    keyword_matched = kr
+                    matched_keyword_str = kw
+                    logger.info(f"private-chat-enhance | 匹配到关键词 [{kw}]")
+                    break
+            if keyword_matched:
                 break
 
         # 启用延迟时，关键词匹配使用异步任务发送，无匹配则延迟后继续传递
         if cfg.enable_delay:
             if keyword_matched:
                 # 记录到持久化存储
-                self.keyword_store.mark_triggered(user_id, keyword_matched.keyword, time.time())
+                self.keyword_store.mark_triggered(user_id, matched_keyword_str, time.time())
                 logger.info(
-                    f"private-chat-enhance | 用户 {user_id} 首次触发关键词 [{keyword_matched.keyword}]，"
+                    f"private-chat-enhance | 用户 {user_id} 首次触发关键词 [{matched_keyword_str}]，"
                     f"将在延迟后发送回复"
                 )
                 # 异步发送关键词回复，不阻断事件流
@@ -119,9 +124,9 @@ class Main(star.Star):
                 await self._delay_reply(cfg.min_delay_sec, cfg.max_delay_sec)
         elif keyword_matched:
             # 未启用延迟，直接同步发送关键词回复并阻断事件流
-            self.keyword_store.mark_triggered(user_id, keyword_matched.keyword, time.time())
+            self.keyword_store.mark_triggered(user_id, matched_keyword_str, time.time())
             logger.info(
-                f"private-chat-enhance | 用户 {user_id} 首次触发关键词 [{keyword_matched.keyword}]，发送回复"
+                f"private-chat-enhance | 用户 {user_id} 首次触发关键词 [{matched_keyword_str}]，发送回复"
             )
             yield event.plain_result(keyword_matched.reply)
             return

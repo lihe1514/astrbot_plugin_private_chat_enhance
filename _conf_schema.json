@@ -27,8 +27,13 @@
         "items": {
           "keyword": {
             "type": "string",
-            "description": "触发关键词",
-            "hint": "当用户消息包含此关键词时触发"
+            "description": "单个关键词",
+            "hint": "单个关键词，与 keywords 二选一"
+          },
+          "keywords": {
+            "type": "list",
+            "description": "关键词列表",
+            "hint": "多个关键词对应同一回复，与 keyword 二选一"
           },
           "reply": {
             "type": "string",

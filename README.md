@@ -31,11 +31,14 @@ git clone https://github.com/lihe1514/astrbot_plugin_private_chat_enhance.git
 
 ### 关键词回复配置
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `keyword` | string | 触发关键词 |
-| `reply` | string | 回复内容 |
-| `exact_match` | bool | 是否精确匹配（默认 false，包含即触发） |
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `keyword` | string | 否* | 单个关键词（与 keywords 二选一） |
+| `keywords` | list | 否* | 多个关键词列表（与 keyword 二选一） |
+| `reply` | string | 是 | 回复内容 |
+| `exact_match` | bool | 否 | 是否精确匹配（默认 false，包含即触发） |
+
+> *`keyword` 和 `keywords` 至少填写一个，可同时使用
 
 ### 配置示例
 
@@ -46,13 +49,12 @@ git clone https://github.com/lihe1514/astrbot_plugin_private_chat_enhance.git
   "max_delay_sec": 20,
   "keyword_replies": [
     {
-      "keyword": "资料",
-      "reply": "相关资料链接：https://example.com",
-      "exact_match": false
+      "keyword": "帮助",
+      "reply": "请问有什么可以帮助您的？"
     },
     {
-      "keyword": "帮助",
-      "reply": "请问有什么可以帮助您的？",
+      "keywords": ["资料", "文档", "下载"],
+      "reply": "相关资料链接：https://example.com",
       "exact_match": false
     }
   ]

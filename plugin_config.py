@@ -6,7 +6,7 @@ from typing import Any
 @dataclass(frozen=True)
 class KeywordReply:
     """关键词回复配置"""
-    keyword: str
+    keywords: list[str]  # 关键词列表（支持多个关键词对应同一回复）
     reply: str
     exact_match: bool = False
 
@@ -48,15 +48,28 @@ def parse_plugin_config(raw: dict[str, Any] | None) -> PluginConfig:
 
     keyword_replies: list[KeywordReply] = []
     raw_keyword_replies = raw.get("keyword_replies", [])
-    print(f"[DEBUG] raw keyword_replies type: {type(raw_keyword_replies)}")
-    print(f"[DEBUG] raw keyword_replies value: {raw_keyword_replies}")
     for item in raw_keyword_replies:
         if isinstance(item, dict):
-            keyword = str(item.get("keyword", "")).strip()
+            # 解析关键词列表：支持 keyword（单个）和 keywords（多个）
+            keywords: list[str] = []
+
+            # 单关键词
+            single_keyword = str(item.get("keyword", "")).strip()
+            if single_keyword:
+                keywords.append(single_keyword)
+
+            # 多关键词列表
+            raw_keywords = item.get("keywords", [])
+            if isinstance(raw_keywords, list):
+                for kw in raw_keywords:
+                    kw_str = str(kw).strip()
+                    if kw_str and kw_str not in keywords:
+                        keywords.append(kw_str)
+
             reply = str(item.get("reply", "")).strip()
-            if keyword and reply:
+            if keywords and reply:
                 keyword_replies.append(KeywordReply(
-                    keyword=keyword,
+                    keywords=keywords,
                     reply=reply,
                     exact_match=_to_bool(item.get("exact_match"), False),
                 ))
