@@ -5,8 +5,7 @@ import time
 from pathlib import Path
 
 from astrbot.api import logger, star
-from astrbot.api.event import AstrMessageEvent, filter
-from astrbot.api.message_components import MessageChain
+from astrbot.api.event import AstrMessageEvent, filter, MessageChain
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
 from .keyword_trigger_store import KeywordTriggerStore
