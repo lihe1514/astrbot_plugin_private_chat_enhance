@@ -6,6 +6,7 @@ from pathlib import Path
 
 from astrbot.api import logger, star
 from astrbot.api.event import AstrMessageEvent, filter, MessageChain
+from astrbot.api.message_components import Image, Record, Video, File
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
 from .keyword_trigger_store import KeywordTriggerStore
@@ -60,12 +61,30 @@ class Main(star.Star):
         chain = MessageChain().message(reply)
         await self.context.send_message(unified_msg_origin, chain)
 
+    def _has_media_content(self, event: AstrMessageEvent) -> bool:
+        """检查消息是否包含媒体内容（图片、语音、视频、文件）"""
+        if not event.message_obj or not event.message_obj.chain:
+            return False
+        for comp in event.message_obj.chain:
+            if isinstance(comp, (Image, Record, Video, File)):
+                return True
+        return False
+
     @filter.event_message_type(filter.EventMessageType.PRIVATE_MESSAGE)
     async def on_private_message(self, event: AstrMessageEvent):
         """处理私聊消息"""
+        # 过滤非文本消息（图片、语音、视频、文件）
+        if self._has_media_content(event):
+            logger.debug("private-chat-enhance | 忽略非文本消息（图片/语音/视频/文件）")
+            return
+
         cfg = self._cfg()
         user_id = self._get_user_id(event)
         message = event.message_str.strip()
+
+        # 空消息也忽略
+        if not message:
+            return
 
         logger.info(
             f"private-chat-enhance | 收到私聊消息 | user={user_id} msg={message} "
