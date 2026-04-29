@@ -17,6 +17,9 @@ class PluginConfig:
     enable_delay: bool = True
     min_delay_sec: int = 2
     max_delay_sec: int = 30
+    enable_llm_delay: bool = False
+    llm_min_delay_sec: int = 0
+    llm_max_delay_sec: int = 0
     keyword_replies: list[KeywordReply] = field(default_factory=list)
 
 
@@ -77,9 +80,26 @@ def parse_plugin_config(raw: dict[str, Any] | None) -> PluginConfig:
     min_delay = min(60, max(0, _to_int(raw.get("min_delay_sec"), 2)))
     max_delay = min(60, max(min_delay, _to_int(raw.get("max_delay_sec"), 30)))
 
+    # LLM 延迟配置 - 如果启用了总延迟，默认也启用 LLM 延迟
+    enable_llm_delay = _to_bool(raw.get("enable_llm_delay"), raw.get("enable_delay", True))
+    llm_min_delay = _to_int(raw.get("llm_min_delay_sec"), min_delay)
+    llm_max_delay = _to_int(raw.get("llm_max_delay_sec"), max_delay)
+
+    # 如果启用 LLM 延迟，确保范围有效
+    if enable_llm_delay:
+        if llm_min_delay > 60:
+            llm_min_delay = 60
+        if llm_max_delay < llm_min_delay:
+            llm_max_delay = llm_min_delay
+        if llm_max_delay > 60:
+            llm_max_delay = 60
+
     return PluginConfig(
         enable_delay=_to_bool(raw.get("enable_delay"), True),
         min_delay_sec=min_delay,
         max_delay_sec=max_delay,
+        enable_llm_delay=enable_llm_delay,
+        llm_min_delay_sec=llm_min_delay,
+        llm_max_delay_sec=llm_max_delay,
         keyword_replies=keyword_replies,
     )
