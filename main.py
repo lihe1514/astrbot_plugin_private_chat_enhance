@@ -139,9 +139,9 @@ class Main(star.Star):
 
     def _has_media_content(self, event: AstrMessageEvent) -> bool:
         """检查消息是否包含媒体内容（图片、语音、视频、文件）"""
-        if not event.message_obj or not event.message_obj.message_chain:
+        if not event.message_obj or not event.message_obj.message:
             return False
-        for comp in event.message_obj.message_chain:
+        for comp in event.message_obj.message:
             if isinstance(comp, (Image, Record, Video, File)):
                 return True
         return False
