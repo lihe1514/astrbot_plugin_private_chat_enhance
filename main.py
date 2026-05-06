@@ -222,7 +222,7 @@ class Main(star.Star):
             else:
                 # 无关键词匹配，加入聚合缓冲区
                 aggregated = await self.msg_aggregator.add_message(
-                    event.unified_msg_origin, message
+                    user_id, event.unified_msg_origin, message
                 )
                 if aggregated:
                     # 达到阈值或超时，返回聚合消息
